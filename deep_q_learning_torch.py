@@ -266,8 +266,6 @@ class DDPG:
 
         self.update_target_model()
 
-        self.device = 'cuda'
-
     def update_memory(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
 
@@ -280,14 +278,14 @@ class DDPG:
     def _get_discrete_action(self, state, epsilon=0):
         if np.random.random() < epsilon:
             return np.random.randint(0, self.action_dim)
-        state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(self.device)
+        state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
         with torch.no_grad():
             return torch.argmax(self.actor(state_tensor)).item()
 
     def _get_continuous_action(self, state, epsilon=0):
         if np.random.random() < epsilon:
             return np.random.uniform(low=0.0, high=1.0, size=self.action_dim)
-        state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(self.device)
+        state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0)
         with torch.no_grad():
             return self.actor(state_tensor).squeeze(0).numpy()
 
@@ -311,11 +309,11 @@ class DDPG:
 
         minibatch = random.sample(self.memory, self.batch_size)
 
-        states = torch.tensor(np.array([m[0] for m in minibatch]), dtype=torch.float32).to(self.device)
-        actions = torch.tensor(np.array([m[1] for m in minibatch]), dtype=torch.float32).to(self.device)
-        rewards = torch.tensor(np.array([m[2] for m in minibatch]), dtype=torch.float32).to(self.device)
-        next_states = torch.tensor(np.array([m[3] for m in minibatch]), dtype=torch.float32).to(self.device)
-        dones = torch.tensor(np.array([m[4] for m in minibatch]), dtype=torch.float32).to(self.device)
+        states = torch.tensor(np.array([m[0] for m in minibatch]), dtype=torch.float32)
+        actions = torch.tensor(np.array([m[1] for m in minibatch]), dtype=torch.float32)
+        rewards = torch.tensor(np.array([m[2] for m in minibatch]), dtype=torch.float32)
+        next_states = torch.tensor(np.array([m[3] for m in minibatch]), dtype=torch.float32)
+        dones = torch.tensor(np.array([m[4] for m in minibatch]), dtype=torch.float32)
 
         with torch.no_grad():
             target_actions = self.target_actor(next_states)
